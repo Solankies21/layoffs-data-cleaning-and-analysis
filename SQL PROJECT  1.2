@@ -1,0 +1,162 @@
+use layoff;
+ 
+#TO CHECK NULL VALUES IN T1 TABLE 
+
+SELECT t1.industry,t2.industry 
+FROM layoffs2 t1 
+JOIN layoffs2 t2 
+ON t1.company = t2.company 
+and t1.location = t2.location 
+WHERE(t1.industry is null or t2.industry = '') 
+AND t2.industry is not null; 
+
+#TO UPDATE T1 NULL TABLES FROM T2 
+
+UPDATE layoffs2 t1
+JOIN layoffs2 t2 
+ON t1.company=t2.company
+SET t1.industry=t2.industry 
+WHERE t1.industry is null 
+and t2.industry is not null; 
+
+
+#TO REMOVE COMMON NULL VALUES FORM COLUMNS 
+
+select * from layoffs2
+where total_laid_off IS NULL 
+AND percentage_laid_off IS Null; 
+
+delete 
+FROM layoffs2 
+WHERE total_laid_off IS NULL 
+AND percentage_laid_off IS NULL; 
+
+SELECT * FROM 
+layoffs2; 
+
+#EXPLORATARY ANALYSIS 
+
+-- 1. HOW MANY LAYOFFS HAPPENED PER COUNTRY?
+
+SELECT country , sum(total_laid_off) 
+as total_layoffs 
+from layoffs2
+group by country 
+order by total_layoffs desc 
+limit 10; 
+
+-- 2. which industry faced the highest number of layoffs?
+
+SELECT industry , sum(total_laid_off) 
+as total_layoffs 
+from layoffs2 
+group by industry 
+order by total_layoffs desc; 
+
+
+-- 3 which companies laid off more than certain threshold of employees (e,g 5000) 
+
+select company, total_laid_off 
+from layoffs2 
+where total_laid_off>5000
+order by total_laid_off desc; 
+
+-- 4 what is the average percentage of workforce 
+
+select industry, avg(percentage_laid_off) as avg_percentage_laid_off 
+from layoffs2 
+group by industry 
+order by avg_percentage_laid_off desc;
+
+-- 5 what are the top 10 companies with the most layoffs?
+
+select company, total_laid_off 
+from layoffs2
+order by total_laid_off desc 
+limit 10; 
+
+-- 6 what is the total number of layoffs across all compaines ?
+
+select sum(total_laid_off) AS total_offs 
+from layoffs2; 
+
+-- 7 how many layoffs occured in each funding  stage (e.g, Post-IPO, Series B )?
+
+select stage, COUNT(*) as num_layoffs 
+from layoffs2 
+group by stage 
+order by num_layoffs desc; 
+
+-- 8. which country raised the highest amount of funds ? 
+
+select country, SUM(funds_raised_millions) 
+as total_fund_raised
+from layoffs2
+group by country 
+order by total_fund_raised desc 
+limit 10; 
+
+
+-- 9 which companies had layoffs with missing data for percentage laid off? 
+
+select company, total_laid_off 
+from layoffs2
+where percentage_laid_off is null 
+order by total_laid_off desc; 
+
+-- 10 how many layoffs occurred in a specific time period (e.g. , 2023) ? 
+
+select count(*) as layoffs_in_2023 
+from layoffs2
+where YEAR(date) = 2023; 
+
+-- 11. which countries have the higest percentage of layoffs relative to their total workforce ? 
+
+select country, avg(percentage_laid_off) as avg_percentage_laid_off 
+from layoffs2
+group by country
+order by avg_percentage_laid_off desc
+limit 10; 
+
+-- 12. what is the distribution of layoffs accross different locations (cities)? 
+
+select location,count(*) as num_offs 
+from layoffs2 
+group by location 
+order by num_offs desc; 
+
+-- 13. what are the top 5 industries that raised the most funds and had layoffs ? 
+
+select industry,sum(funds_raised_millions) 
+as total_funds_raised 
+from layoffs2
+where total_laid_off>0 
+group by industry 
+order by total_funds_raised desc 
+limit 5; 
+
+
+-- 14. maximum of total_laid_off and percentage_laid_off ? 
+
+select max(total_laid_off), 
+max(percentage_laid_off)
+FROM layoffs2; 
+
+
+-- 15. layoffs from start date to end date ? 
+
+select min(`date`),max(`date`)
+from layoffs2;
+
+-- 16.  Sum of total_laid_off by year? 
+
+select year(`date`),sum(total_laid_off) 
+from layoffs2 
+group by year(`date`) 
+order by 1 desc;
+
+
+------------------------ THE END -------------------------------
+
+
+
